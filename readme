@@ -1,0 +1,5 @@
+Arduino Code which will read temperature and humidity from a DHT22(RHT03) sensor
+
+Will publish the data to https://xively.com/ so becoming an IOT (Internet Of Things device)
+
+Currently just the example code to get the sensor working
