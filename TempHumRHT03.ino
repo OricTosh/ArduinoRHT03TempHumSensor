@@ -4,6 +4,7 @@
 #include <Ethernet.h>
 #include <HttpClient.h>
 #include <Xively.h>
+#include <LiquidCrystal.h>
 
 // Data wire is plugged into port 7 on the Arduino
 // Connect a 4.7K resistor between VCC and the data pin (strong pullup)
@@ -17,6 +18,9 @@ long interval = 300000;
 // Setup a DHT22 instance
 DHT22 myDHT22(DHT22_PIN);
 
+// initialize the libary 
+LiquidCrystal lcd(8, 9, 5, 4, 3, 2);
+
 // MAC address for your Ethernet shield
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 // Your Xively key to let you upload data
@@ -26,11 +30,11 @@ char xivelyKey[] = "7jM92EM2nDNPGPkePjLI3NHkU0DiCSimf1kACR2sdpqLlHCv";
 // Define the strings for our datastream IDs
 char myHumidSensor[] = "Humidity";
 char myTempSensor[] = "Temperature";
-char buf[128];
+char buf[32];
 
 XivelyDatastream datastreams[] = {
-  XivelyDatastream(myHumidSensor, strlen(myHumidSensor), DATASTREAM_FLOAT),
   XivelyDatastream(myTempSensor, strlen(myTempSensor), DATASTREAM_FLOAT),
+  XivelyDatastream(myHumidSensor, strlen(myHumidSensor), DATASTREAM_FLOAT),
   //XivelyDatastream(buf, strlen(buf), DATASTREAM_STRING)
 };
 
@@ -42,20 +46,32 @@ XivelyClient xivelyclient(client);
 
 void setup(void)
 {
+  lcd.begin(16,2);
+  //lcd.cursor();    // helps with layout
+  lcd.setCursor(0,0);
+  lcd.print("A Temp&Humidity");
+  lcd.setCursor(0, 1);
+  lcd.print("  IOT Device   ");
+  delay(6000);
+  lcd.clear();
+  lcd.print("Temp    Humidity");
+  lcd.setCursor(0, 1);
+  
   // start serial port
   Serial.begin(9600);
   Serial.println("DHT22 Library Demo");
   
-  Serial.println("Attempting to get an IP address using DHCP:");
-  if (!Ethernet.begin(mac)) {
+   Serial.println("Attempting to get an IP address using DHCP:");
+   if (!Ethernet.begin(mac)) {
     Serial.println("failed to get an IP address using DHCP, trying manually");
         //Ethernet.begin(mac, ip, gateway);
-        delay(10000);
-  }
+        delay(10000);   
+   }
   
   Serial.print("My address:");
   Serial.println(Ethernet.localIP());
   pinMode(ledPin, OUTPUT);
+    
 }
 
 void loop(void)
@@ -73,21 +89,32 @@ void loop(void)
   switch(errorCode)
   {
     case DHT_ERROR_NONE:
-      Serial.print("Got Data ");
-      Serial.print(myDHT22.getTemperatureC());
-      Serial.print("C ");
-      Serial.print(myDHT22.getHumidity());
-      Serial.println("%");
+      //Serial.print("Got Data ");
+      //Serial.print(myDHT22.getTemperatureC());
+      //Serial.print("C ");      
+      //Serial.print(myDHT22.getHumidity());
+      //Serial.println("%");
+      
+      sprintf(buf, "%hi.%01hi C, %i.%01i %%RH",
+                   myDHT22.getTemperatureCInt()/10, abs(myDHT22.getTemperatureCInt()%10),
+                   myDHT22.getHumidityInt()/10, myDHT22.getHumidityInt()%10);
+      lcd.print(buf);
+      lcd.setCursor(0, 1);
       
       if(currentMillis - previousMillis > interval)
       {
          previousMillis = currentMillis;
-         datastreams[0].setFloat(myDHT22.getHumidity());
-         datastreams[1].setFloat(myDHT22.getTemperatureC());
+         datastreams[0].setFloat(myDHT22.getTemperatureC());         
+         datastreams[1].setFloat(myDHT22.getHumidity());
+         
+         lcd.print("Uploading.......");
          Serial.println("Uploading it to Xively");
          ret = xivelyclient.put(feed, xivelyKey);
          Serial.print("xivelyclient.put returned ");
-         Serial.println(ret);
+         lcd.setCursor(13, 1);
+         lcd.print(ret);
+         Serial.println(ret);               
+         
         if (ledState == LOW)
            ledState = HIGH;
         else
