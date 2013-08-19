@@ -24,7 +24,7 @@ LiquidCrystal lcd(8, 9, 5, 4, 3, 2);
 // MAC address for your Ethernet shield
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 // Your Xively key to let you upload data
-char xivelyKey[] = "7jM92EM2nDNPGPkePjLI3NHkU0DiCSimf1kACR2sdpqLlHCv";
+char xivelyKey[] = "Your API KEY";
 
 
 // Define the strings for our datastream IDs
