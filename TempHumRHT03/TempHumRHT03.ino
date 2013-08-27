@@ -6,32 +6,47 @@
 #include <Xively.h>
 #include <LiquidCrystal.h>
 
+byte DownChar[8] = {
+	0b00100,
+	0b00100,
+	0b00100,
+	0b00100,
+	0b00100,
+	0b11111,
+	0b01110,
+	0b00100
+};
+
+byte UpChar[8] = {
+	0b00100,
+	0b01110,
+	0b11111,
+	0b00100,
+	0b00100,
+	0b00100,
+	0b00100,
+	0b00100
+};
+
 // Data wire is plugged into port 7 on the Arduino
-// Connect a 4.7K resistor between VCC and the data pin (strong pullup)
 #define DHT22_PIN 7
 const int ledPin = 6;
 int ret;
 int ledState = LOW;
 long previousMillis = 0;
 long interval = 300000;
-
 // Setup a DHT22 instance
 DHT22 myDHT22(DHT22_PIN);
-
 // initialize the libary 
 LiquidCrystal lcd(8, 9, 5, 4, 3, 2);
-
 // MAC address for your Ethernet shield
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 // Your Xively key to let you upload data
-char xivelyKey[] = "Your API KEY";
-
-
+char xivelyKey[] = "Your_API_KEY";
 // Define the strings for our datastream IDs
 char myHumidSensor[] = "Humidity";
 char myTempSensor[] = "Temperature";
 char buf[32];
-
 XivelyDatastream datastreams[] = {
   XivelyDatastream(myTempSensor, strlen(myTempSensor), DATASTREAM_FLOAT),
   XivelyDatastream(myHumidSensor, strlen(myHumidSensor), DATASTREAM_FLOAT),
@@ -44,8 +59,11 @@ XivelyFeed feed(211109309, datastreams, 2 /* number of datastreams */);
 EthernetClient client;
 XivelyClient xivelyclient(client);
 
+
 void setup(void)
 {
+  lcd.createChar(0, DownChar);
+  lcd.createChar(1, UpChar);
   lcd.begin(16,2);
   //lcd.cursor();    // helps with layout
   lcd.setCursor(0,0);
@@ -54,7 +72,10 @@ void setup(void)
   lcd.print("  IOT Device   ");
   delay(6000);
   lcd.clear();
-  lcd.print("Temp    Humidity");
+  lcd.print("Temp ");
+  lcd.write((uint8_t)0);
+  lcd.write((uint8_t)1);
+  lcd.print(" Humidity");
   lcd.setCursor(0, 1);
   
   // start serial port
@@ -80,11 +101,10 @@ void loop(void)
   
   // The sensor can only be read from every 1-2s, and requires a minimum
   // 2s warm-up after power-on.
-  delay(3000);
+  delay(3000); // set warm up to 3s
   unsigned long currentMillis = millis();
-  Serial.println(currentMillis);
+ // Serial.println(currentMillis); // debug
   
-  Serial.print("Requesting data...");
   errorCode = myDHT22.readData();
   switch(errorCode)
   {
