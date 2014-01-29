@@ -2,4 +2,13 @@ Arduino Code which will read temperature and humidity from a DHT22(RHT03) sensor
 
 Will publish the data to https://xively.com/ so becoming an IOT (Internet Of Things device)
 
-Currently just the example code to get the sensor working
+Has A LCD for local display of data to the people within the hackerspace.
+This display is updated every 3 secs and then the data is uploaded to Xively every 5 Mins.
+There is also a LED which turns ON & Off every time it uploads data so to give 
+some local feedback to say it's working ok.
+
+Things to add:
+Show & Upload Average 
+Show Max & Min Temperature and Humidity
+
+Temperature has been checked with another Temperature Device which show the same temperature 
